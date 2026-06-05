@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="8" y="8" width="48" height="48" rx="3" fill="#C84032" opacity="0.9"/>
+  <text x="32" y="30" text-anchor="middle" font-family="STFangsong, FangSong, serif" font-size="20" fill="#F5EFE0" font-weight="bold">痕</text>
+  <text x="32" y="52" text-anchor="middle" font-family="STFangsong, FangSong, serif" font-size="20" fill="#F5EFE0" font-weight="bold">迹</text>
+</svg>

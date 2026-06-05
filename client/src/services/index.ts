@@ -1,0 +1,78 @@
+import api from './api';
+import type {
+  User,
+  Work,
+  Note,
+  NoteWithWork,
+  Tag,
+  StatsOverview,
+  HeatmapData,
+  MonthlyStat,
+  AnnualReport,
+  ChineseColor,
+  PaginationResult,
+  Rating,
+  WorkStatus,
+} from '@/types';
+
+interface AuthResponse {
+  token: string;
+  user: User;
+}
+
+export const authApi = {
+  register: (username: string, email: string, password: string) =>
+    api.post<AuthResponse>('/auth/register', { username, email, password }).then((r) => r.data),
+  login: (email: string, password: string) =>
+    api.post<AuthResponse>('/auth/login', { email, password }).then((r) => r.data),
+  getMe: () => api.get<User>('/auth/me').then((r) => r.data),
+};
+
+export const workApi = {
+  list: (params?: Record<string, any>) =>
+    api.get<PaginationResult<Work>>('/works', { params }).then((r) => r.data),
+  detail: (id: string) => api.get<Work>(`/works/${id}`).then((r) => r.data),
+  create: (data: Partial<Work>) => api.post<Work>('/works', data).then((r) => r.data),
+  update: (id: string, data: Partial<Work>) =>
+    api.put<Work>(`/works/${id}`, data).then((r) => r.data),
+  remove: (id: string) => api.delete(`/works/${id}`).then((r) => r.data),
+  updateProgress: (id: string, data: { currentEpisode?: number; currentPage?: number; status?: WorkStatus; moodColor?: string }) =>
+    api.put<Work>(`/works/${id}/progress`, data).then((r) => r.data),
+  updateRating: (id: string, rating: Rating, moodColor?: string) =>
+    api.put<Work>(`/works/${id}/rating`, { rating, moodColor }).then((r) => r.data),
+};
+
+export const noteApi = {
+  list: (params?: Record<string, any>) =>
+    api.get<PaginationResult<NoteWithWork>>('/notes', { params }).then((r) => r.data),
+  detail: (id: string) => api.get<NoteWithWork>(`/notes/${id}`).then((r) => r.data),
+  create: (data: Partial<Note>) => api.post<Note>('/notes', data).then((r) => r.data),
+  update: (id: string, data: Partial<Note>) =>
+    api.put<Note>(`/notes/${id}`, data).then((r) => r.data),
+  remove: (id: string) => api.delete(`/notes/${id}`).then((r) => r.data),
+};
+
+export const tagApi = {
+  list: () => api.get<Tag[]>('/tags').then((r) => r.data),
+  create: (data: { name: string; color?: string }) =>
+    api.post<Tag>('/tags', data).then((r) => r.data),
+  update: (id: string, data: { name: string; color?: string }) =>
+    api.put<Tag>(`/tags/${id}`, data).then((r) => r.data),
+  remove: (id: string) => api.delete(`/tags/${id}`).then((r) => r.data),
+};
+
+export const statsApi = {
+  overview: () => api.get<StatsOverview>('/stats/overview').then((r) => r.data),
+  heatmap: (weeks?: number) =>
+    api.get<HeatmapData>('/stats/weekly-heatmap', { params: { weeks } }).then((r) => r.data),
+  monthly: (year?: number) =>
+    api.get<{ year: number; months: MonthlyStat[] }>('/stats/monthly', { params: { year } }).then((r) => r.data),
+  annualReport: (year: number) =>
+    api.get<AnnualReport>(`/stats/annual-report/${year}`).then((r) => r.data),
+};
+
+export const searchApi = {
+  global: (q: string, scope: 'all' | 'works' | 'notes' | 'tags' = 'all') =>
+    api.get<{ works: Work[]; notes: Note[]; tags: Tag[] }>('/search', { params: { q, scope } }).then((r) => r.data),
+  colors: () => api.get<ChineseColor[]>('/search/colors').then((r) => r.data),
+};
