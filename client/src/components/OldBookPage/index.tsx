@@ -12,8 +12,11 @@ interface Props {
 }
 
 export default function OldBookPage({ note, work, onEdit, onDelete, variant = 'vertical' }: Props) {
-  const { chineseColors } = useUserStore();
+  const { chineseColors, binding } = useUserStore();
   const [hovered, setHovered] = useState(false);
+  const sealText = binding.sealStyle === 'yiyue' ? '已阅'
+    : binding.sealStyle === 'shenpin' ? '神品'
+    : binding.sealStyle === 'jingdu' ? '静读' : '';
 
   const colorMeta = chineseColors.find((c) => c.hex === note.moodColor);
   const workTitle = work?.title || (typeof note.workId === 'object' ? (note.workId as any).title : '');
@@ -62,15 +65,24 @@ export default function OldBookPage({ note, work, onEdit, onDelete, variant = 'v
       }} />
 
       {/* 角落墨梅装饰 */}
-      <svg width="48" height="48" viewBox="0 0 48 48" style={{
-        position: 'absolute', bottom: 8, right: 8, opacity: 0.12,
-      }}>
-        <circle cx="24" cy="24" r="3" fill="#1A1A1A" />
-        <circle cx="18" cy="20" r="2.5" fill="#1A1A1A" />
-        <circle cx="30" cy="20" r="2.5" fill="#1A1A1A" />
-        <circle cx="20" cy="30" r="2.5" fill="#1A1A1A" />
-        <circle cx="28" cy="30" r="2.5" fill="#1A1A1A" />
-      </svg>
+      {!sealText && (
+        <svg width="48" height="48" viewBox="0 0 48 48" style={{
+          position: 'absolute', bottom: 8, right: 8, opacity: 0.12,
+        }}>
+          <circle cx="24" cy="24" r="3" fill="#1A1A1A" />
+          <circle cx="18" cy="20" r="2.5" fill="#1A1A1A" />
+          <circle cx="30" cy="20" r="2.5" fill="#1A1A1A" />
+          <circle cx="20" cy="30" r="2.5" fill="#1A1A1A" />
+          <circle cx="28" cy="30" r="2.5" fill="#1A1A1A" />
+        </svg>
+      )}
+
+      {/* 闲章 */}
+      {sealText && (
+        <div className="corner-seal corner-seal-bottom-right" style={{ width: 44, height: 44, fontSize: 13 }}>
+          {sealText}
+        </div>
+      )}
 
       <div style={{ position: 'relative', zIndex: 1 }}>
         {/* 顶部元信息 */}

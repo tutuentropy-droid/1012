@@ -7,12 +7,17 @@ import OldBookPage from '@/components/OldBookPage';
 import Loading from '@/components/common/Loading';
 import SealStamp from '@/components/SealStamp';
 import { formatRelative } from '@/utils/date';
+import { useUserStore } from '@/stores/user';
 
 export default function Home() {
   const [recentWorks, setRecentWorks] = useState<Work[]>([]);
   const [recentNotes, setRecentNotes] = useState<NoteWithWork[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { binding } = useUserStore();
+  const sealText = binding.sealStyle === 'yiyue' ? '已阅'
+    : binding.sealStyle === 'shenpin' ? '神品'
+    : binding.sealStyle === 'jingdu' ? '静读' : '';
 
   useEffect(() => {
     Promise.all([
@@ -31,7 +36,12 @@ export default function Home() {
   if (loading) return <Loading />;
 
   return (
-    <div>
+    <div style={{ position: 'relative' }}>
+      {sealText && (
+        <div className="corner-seal corner-seal-top-right">
+          {sealText}
+        </div>
+      )}
       <section style={{
         textAlign: 'center',
         padding: 'var(--spacing-xl) 0 var(--spacing-2xl)',

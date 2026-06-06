@@ -1,11 +1,50 @@
+export type PaperTexture = 'xuanzhi' | 'maobian' | 'yunlong';
+export type InkLevel = 1 | 2 | 3 | 4 | 5 | 6;
+export type SealStyle = 'none' | 'yiyue' | 'shenpin' | 'jingdu';
+
+export interface BindingPreferences {
+  paperTexture: PaperTexture;
+  inkLevel: InkLevel;
+  sealStyle: SealStyle;
+}
+
 export interface User {
   _id: string;
   username: string;
   email: string;
   bio?: string;
   avatar?: string;
+  preferences?: Record<string, any>;
   createdAt: string;
 }
+
+export const PAPER_TEXTURES: { value: PaperTexture; label: string; desc: string }[] = [
+  { value: 'xuanzhi', label: '宣纸', desc: '洁白细密，纤维匀净，千年寿纸' },
+  { value: 'maobian', label: '毛边纸', desc: '微黄粗糙，竹纤维显，古意盎然' },
+  { value: 'yunlong', label: '云龙纸', desc: '龙纹隐现，皮筋交织，厚重典雅' },
+];
+
+export const INK_LEVELS: { value: InkLevel; label: string; desc: string }[] = [
+  { value: 1, label: '远山', desc: '淡如远山含烟' },
+  { value: 2, label: '朝雾', desc: '朦胧若雾' },
+  { value: 3, label: '暮色', desc: '暮色四合' },
+  { value: 4, label: '深黛', desc: '浓如远山' },
+  { value: 5, label: '焦墨', desc: '焦黑如炭' },
+  { value: 6, label: '漆夜', desc: '浓如漆夜' },
+];
+
+export const SEAL_STYLES: { value: SealStyle; label: string; text: string }[] = [
+  { value: 'none', label: '不盖印', text: '' },
+  { value: 'yiyue', label: '已阅', text: '已阅' },
+  { value: 'shenpin', label: '神品', text: '神品' },
+  { value: 'jingdu', label: '静读', text: '静读' },
+];
+
+export const DEFAULT_BINDING: BindingPreferences = {
+  paperTexture: 'xuanzhi',
+  inkLevel: 3,
+  sealStyle: 'none',
+};
 
 export interface Tag {
   _id: string;

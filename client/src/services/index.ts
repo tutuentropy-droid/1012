@@ -26,6 +26,8 @@ export const authApi = {
   login: (email: string, password: string) =>
     api.post<AuthResponse>('/auth/login', { email, password }).then((r) => r.data),
   getMe: () => api.get<User>('/auth/me').then((r) => r.data),
+  updatePreferences: (preferences: Record<string, any>) =>
+    api.put<User>('/auth/preferences', { preferences }).then((r) => r.data),
 };
 
 export const workApi = {
