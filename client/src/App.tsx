@@ -11,6 +11,7 @@ const WorkDetail = lazy(() => import('./pages/WorkDetail'));
 const Notes = lazy(() => import('./pages/Notes'));
 const Statistics = lazy(() => import('./pages/Statistics'));
 const AnnualReport = lazy(() => import('./pages/AnnualReport'));
+const DualOrder = lazy(() => import('./pages/DualOrder'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 
@@ -55,6 +56,7 @@ function App() {
           <Route path="works/:id" element={<WorkDetail />} />
           <Route path="notes" element={<Notes />} />
           <Route path="statistics" element={<Statistics />} />
+          <Route path="dual-order" element={<DualOrder />} />
           <Route path="annual-report/:year" element={<AnnualReport />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

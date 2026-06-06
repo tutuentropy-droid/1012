@@ -64,7 +64,7 @@ export default function Home() {
           墨痕深浅，皆是岁月留下的痕迹
         </p>
         <div style={{
-          display: 'flex', gap: 64, justifyContent: 'center',
+          display: 'flex', gap: 32, justifyContent: 'center',
           marginTop: 48, flexWrap: 'wrap',
         }}>
           <Link to="/works" style={{ textDecoration: 'none' }}>
@@ -78,6 +78,28 @@ export default function Home() {
               borderRadius: 2,
             }}>
               ＋ 纳入新卷
+            </div>
+          </Link>
+          <Link to="/dual-order" style={{ textDecoration: 'none' }}>
+            <div style={{
+              padding: '20px 40px',
+              border: '1px solid var(--ink-medium)',
+              color: 'var(--ink-strong)',
+              fontFamily: 'var(--font-keishu)',
+              fontSize: 18, letterSpacing: '0.3em',
+              transition: 'all var(--dur-fast)',
+              borderRadius: 2,
+            }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--zhusha)';
+                (e.currentTarget as HTMLDivElement).style.color = 'var(--zhusha)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--ink-medium)';
+                (e.currentTarget as HTMLDivElement).style.color = 'var(--ink-strong)';
+              }}
+            >
+              谱 双序阁
             </div>
           </Link>
         </div>

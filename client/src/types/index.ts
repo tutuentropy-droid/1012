@@ -191,6 +191,17 @@ export interface AnnualReport {
   milestones: Milestone[];
 }
 
+export interface HeartOrderPreferences {
+  order: string[];
+  updatedAt: string;
+}
+
+export interface UserPreferences {
+  binding?: BindingPreferences;
+  heartOrder?: HeartOrderPreferences;
+  [key: string]: any;
+}
+
 export const STATUS_LABELS: Record<WorkStatus, string> = {
   wish: '想看',
   watching: '在看',
