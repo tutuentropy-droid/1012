@@ -30,10 +30,14 @@ const CATEGORY_LABEL_CHARS: Record<TasteCategory, string> = {
 };
 
 export default function TasteGraphComponent({ data, loading, onSealUpdate }: Props) {
-  const [activeNode, setActiveNode] = useState<TasteNode | null>(null);
+  const [hoveredNode, setHoveredNode] = useState<TasteNode | null>(null);
+  const [selectedNode, setSelectedNode] = useState<TasteNode | null>(null);
   const [sealSuccess, setSealSuccess] = useState('');
   const longPressTimer = useRef<number | null>(null);
   const { user, setUser } = useUserStore();
+
+  // Modal 显示时使用 selectedNode，否则使用 hoveredNode
+  const activeNode = selectedNode || hoveredNode;
 
   if (loading) return <Loading text="品味图谱绘制中..." />;
 
@@ -47,10 +51,30 @@ export default function TasteGraphComponent({ data, loading, onSealUpdate }: Pro
   const handleNodeLongPress = (node: TasteNode) => {
     if (longPressTimer.current) {
       window.clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
     }
     longPressTimer.current = window.setTimeout(async () => {
+      longPressTimer.current = null;
       await handleStampSeal(node);
     }, 650);
+  };
+
+  const handleNodeMouseUp = () => {
+    if (longPressTimer.current) {
+      window.clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  const handleNodeClick = (node: TasteNode) => {
+    // 只有没有触发长按时才打开详情
+    if (!longPressTimer.current) {
+      setSelectedNode(node);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedNode(null);
   };
 
   const handleStampSeal = async (node: TasteNode) => {
@@ -73,13 +97,6 @@ export default function TasteGraphComponent({ data, loading, onSealUpdate }: Pro
     } catch (e: any) {
       setSealSuccess(e.message || '盖印失败');
       window.setTimeout(() => setSealSuccess(''), 2500);
-    }
-  };
-
-  const handleNodeMouseUp = () => {
-    if (longPressTimer.current) {
-      window.clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
     }
   };
 
@@ -165,11 +182,11 @@ export default function TasteGraphComponent({ data, loading, onSealUpdate }: Pro
                   key={node.id}
                   transform={`translate(${node.x}, ${node.y})`}
                   style={{ cursor: 'pointer' }}
-                  onMouseEnter={() => setActiveNode(node)}
-                  onMouseLeave={() => setActiveNode(null)}
+                  onMouseEnter={() => setHoveredNode(node)}
+                  onMouseLeave={() => setHoveredNode(null)}
                   onMouseDown={() => handleNodeLongPress(node)}
                   onMouseUp={handleNodeMouseUp}
-                  onClick={() => setActiveNode(node)}
+                  onClick={() => handleNodeClick(node)}
                 >
                   <circle r={r + 18} fill={`url(#glow-${node.category})`} opacity={isActive ? 1 : 0.5} />
                   <circle r={r} fill="var(--xuan-white)" stroke={CATEGORY_COLORS[node.category]} strokeWidth={isActive ? 2.5 : 1.5} filter="url(#softShadow)" />
@@ -213,7 +230,7 @@ export default function TasteGraphComponent({ data, loading, onSealUpdate }: Pro
         </div>
       </div>
 
-      <Modal open={!!activeNode} onClose={() => setActiveNode(null)} title={`${TASTE_CATEGORY_LABELS[activeNode?.category || 'director']} · ${activeNode?.name}`} width="680px">
+      <Modal open={!!selectedNode} onClose={handleCloseModal} title={`${TASTE_CATEGORY_LABELS[activeNode?.category || 'director']} · ${activeNode?.name}`} width="680px">
         {activeNode && (
           <div>
             <div style={{
