@@ -33,31 +33,47 @@ export default function TasteGraphComponent({ data, loading, onSealUpdate }: Pro
   const [activeNode, setActiveNode] = useState<TasteNode | null>(null);
   const [sealSuccess, setSealSuccess] = useState('');
   const longPressTimer = useRef<number | null>(null);
-  const { setUser } = useUserStore();
+  const { user, setUser } = useUserStore();
 
   if (loading) return <Loading text="品味图谱绘制中..." />;
+
+  const isSealExist = (node: TasteNode) => {
+    if (!user?.tasteSeals) return false;
+    return user.tasteSeals.some(
+      (s) => s.name === node.name && s.category === node.category
+    );
+  };
 
   const handleNodeLongPress = (node: TasteNode) => {
     if (longPressTimer.current) {
       window.clearTimeout(longPressTimer.current);
     }
     longPressTimer.current = window.setTimeout(async () => {
-      try {
-        const user = await authApi.addTasteSeal({
-          name: node.name,
-          category: node.category,
-          count: node.count,
-          avgRating: node.avgRating,
-        });
-        setUser(user);
-        setSealSuccess(`「${node.name}」已盖印为品味印记`);
-        window.setTimeout(() => setSealSuccess(''), 2500);
-        onSealUpdate?.();
-      } catch (e: any) {
-        setSealSuccess(e.message || '盖印失败');
-        window.setTimeout(() => setSealSuccess(''), 2500);
-      }
+      await handleStampSeal(node);
     }, 650);
+  };
+
+  const handleStampSeal = async (node: TasteNode) => {
+    if (isSealExist(node)) {
+      setSealSuccess(`「${node.name}」已是品味印记`);
+      window.setTimeout(() => setSealSuccess(''), 2500);
+      return;
+    }
+    try {
+      const updatedUser = await authApi.addTasteSeal({
+        name: node.name,
+        category: node.category,
+        count: node.count,
+        avgRating: node.avgRating,
+      });
+      setUser(updatedUser);
+      setSealSuccess(`「${node.name}」已盖印为品味印记`);
+      window.setTimeout(() => setSealSuccess(''), 2500);
+      onSealUpdate?.();
+    } catch (e: any) {
+      setSealSuccess(e.message || '盖印失败');
+      window.setTimeout(() => setSealSuccess(''), 2500);
+    }
   };
 
   const handleNodeMouseUp = () => {
@@ -234,8 +250,12 @@ export default function TasteGraphComponent({ data, loading, onSealUpdate }: Pro
                   )}
                 </div>
               </div>
-              <button className="btn btn-primary" onClick={() => handleNodeLongPress(activeNode)}>
-                盖为印记
+              <button
+                className={isSealExist(activeNode) ? 'btn' : 'btn btn-primary'}
+                onClick={() => handleStampSeal(activeNode)}
+                disabled={isSealExist(activeNode)}
+              >
+                {isSealExist(activeNode) ? '已是印记' : '盖为印记'}
               </button>
             </div>
 

@@ -16,10 +16,15 @@ export default function Modal({ open, onClose, title, children, width = '560px' 
       if (e.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', handleKey);
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
     return () => {
       document.removeEventListener('keydown', handleKey);
       document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
     };
   }, [open, onClose]);
 

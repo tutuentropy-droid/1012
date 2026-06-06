@@ -37,7 +37,20 @@ export default function Statistics() {
     }
   }, [currentYear]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    if (!loading && window.location.hash === '#taste-graph') {
+      window.setTimeout(() => {
+        const el = document.getElementById('taste-graph');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [loading, tasteGraph]);
 
   if (loading) return <Loading />;
 
@@ -222,7 +235,7 @@ export default function Statistics() {
       )}
 
       {tasteGraph && (
-        <section style={{
+        <section id="taste-graph" style={{
           marginBottom: 56,
           padding: 40,
           background: 'var(--xuan-light)',

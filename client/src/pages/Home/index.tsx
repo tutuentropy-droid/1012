@@ -158,7 +158,7 @@ export default function Home() {
         <section style={{ marginBottom: 'var(--spacing-2xl)' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 24 }}>
             <h2 className="brush-underline">品味印记</h2>
-            <Link to="/statistics" style={{
+            <Link to="/statistics#taste-graph" style={{
               fontFamily: 'var(--font-keishu)',
               fontSize: 13, color: 'var(--ink-light)',
               letterSpacing: '0.15em',
