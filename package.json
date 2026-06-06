@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "痕迹 - 一个充满中国古典美学的追剧追书记录网站",
-  "workspaces": ["server", "client"],
+  "workspaces": [
+    "server",
+    "client"
+  ],
   "scripts": {
     "dev": "concurrently -k -n server,client -c red,blue \"npm:dev:server\" \"npm:dev:client\"",
     "dev:server": "cd server && npm run dev",
@@ -16,5 +19,8 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.21"
   }
 }

@@ -18,4 +18,13 @@ const getMe = asyncHandler(async (req, res) => {
   res.json(user);
 });
 
-module.exports = { register, login, getMe };
+const updatePreferences = asyncHandler(async (req, res) => {
+  const { preferences } = req.body;
+  if (!preferences || typeof preferences !== 'object') {
+    throw new AppError('preferences 参数格式错误', 400, 'VALIDATION_ERROR');
+  }
+  const user = await authService.updatePreferences(req.user._id, preferences);
+  res.json(user);
+});
+
+module.exports = { register, login, getMe, updatePreferences };

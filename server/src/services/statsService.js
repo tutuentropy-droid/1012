@@ -1,4 +1,7 @@
 const dayjs = require('dayjs');
+const isBetween = require('dayjs/plugin/isBetween');
+dayjs.extend(isBetween);
+
 const Work = require('../models/Work');
 const Note = require('../models/Note');
 const Tag = require('../models/Tag');

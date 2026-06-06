@@ -36,6 +36,22 @@ class AuthService {
     }
     return user.toJSON();
   }
+
+  async updatePreferences(userId, preferences) {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new AppError('用户不存在', 404, 'NOT_FOUND');
+    }
+    if (!user.preferences) {
+      user.preferences = new Map();
+    }
+    Object.keys(preferences).forEach((key) => {
+      user.preferences.set(key, preferences[key]);
+    });
+    user.markModified('preferences');
+    await user.save();
+    return user.toJSON();
+  }
 }
 
 module.exports = new AuthService();
