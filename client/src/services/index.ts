@@ -13,6 +13,11 @@ import type {
   PaginationResult,
   Rating,
   WorkStatus,
+  TasteGraph,
+  ImportPreviewResult,
+  ImportConfirmResult,
+  TasteSeal,
+  WorkType,
 } from '@/types';
 
 interface AuthResponse {
@@ -28,6 +33,10 @@ export const authApi = {
   getMe: () => api.get<User>('/auth/me').then((r) => r.data),
   updatePreferences: (preferences: Record<string, any>) =>
     api.put<User>('/auth/preferences', { preferences }).then((r) => r.data),
+  addTasteSeal: (seal: Omit<TasteSeal, 'createdAt'>) =>
+    api.post<User>('/auth/taste-seal', seal).then((r) => r.data),
+  removeTasteSeal: (name: string, category: string) =>
+    api.delete<User>(`/auth/taste-seal/${category}/${encodeURIComponent(name)}`).then((r) => r.data),
 };
 
 export const workApi = {
@@ -71,6 +80,14 @@ export const statsApi = {
     api.get<{ year: number; months: MonthlyStat[] }>('/stats/monthly', { params: { year } }).then((r) => r.data),
   annualReport: (year: number) =>
     api.get<AnnualReport>(`/stats/annual-report/${year}`).then((r) => r.data),
+  tasteGraph: () => api.get<TasteGraph>('/stats/taste-graph').then((r) => r.data),
+};
+
+export const importApi = {
+  preview: (content: string, format: 'csv' | 'simple' = 'csv') =>
+    api.post<ImportPreviewResult>('/import/preview', { content, format }).then((r) => r.data),
+  confirm: (action: 'skip' | 'merge' | 'all', matchedItems: any[], unmatchedItems: any[]) =>
+    api.post<ImportConfirmResult>('/import/confirm', { action, matchedItems, unmatchedItems }).then((r) => r.data),
 };
 
 export const searchApi = {

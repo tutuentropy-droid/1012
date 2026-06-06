@@ -7,6 +7,7 @@ import Loading from '@/components/common/Loading';
 import Modal from '@/components/common/Modal';
 import ChineseColorPicker from '@/components/ChineseColorPicker';
 import SealStamp from '@/components/SealStamp';
+import ImportData from '@/components/ImportData';
 import { useUserStore } from '@/stores/user';
 
 const TYPES: (WorkType | 'all')[] = ['all', 'tv', 'book', 'movie', 'other'];
@@ -24,6 +25,7 @@ export default function Works() {
   const [search, setSearch] = useState('');
 
   const [showModal, setShowModal] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [formData, setFormData] = useState({
     type: 'tv' as WorkType,
     title: '', subtitle: '', author: '', cover: '', description: '',
@@ -88,9 +90,14 @@ export default function Works() {
             共 {pagination.total} 部作品留痕
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-          纳入新卷
-        </button>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button className="btn" onClick={() => setShowImport(true)}>
+            万卷入阁
+          </button>
+          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+            纳入新卷
+          </button>
+        </div>
       </div>
 
       <div style={{
@@ -301,6 +308,8 @@ export default function Works() {
           </div>
         </div>
       </Modal>
+
+      <ImportData open={showImport} onClose={() => setShowImport(false)} onSuccess={loadData} />
     </div>
   );
 }

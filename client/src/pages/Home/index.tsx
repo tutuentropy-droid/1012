@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { workApi, noteApi, statsApi } from '@/services';
-import type { Work, NoteWithWork } from '@/types';
+import { workApi, noteApi, statsApi, authApi } from '@/services';
+import type { Work, NoteWithWork, TasteSeal } from '@/types';
+import { TASTE_CATEGORY_LABELS } from '@/types';
 import WorkCard from '@/components/WorkCard';
 import OldBookPage from '@/components/OldBookPage';
 import Loading from '@/components/common/Loading';
@@ -13,8 +14,9 @@ export default function Home() {
   const [recentWorks, setRecentWorks] = useState<Work[]>([]);
   const [recentNotes, setRecentNotes] = useState<NoteWithWork[]>([]);
   const [stats, setStats] = useState<any>(null);
+  const [tasteSeals, setTasteSeals] = useState<TasteSeal[]>([]);
   const [loading, setLoading] = useState(true);
-  const { binding } = useUserStore();
+  const { binding, user, setUser } = useUserStore();
   const sealText = binding.sealStyle === 'yiyue' ? '已阅'
     : binding.sealStyle === 'shenpin' ? '神品'
     : binding.sealStyle === 'jingdu' ? '静读' : '';
@@ -24,14 +26,17 @@ export default function Home() {
       workApi.list({ pageSize: 6, sortBy: 'updatedAt', sortOrder: 'desc' }),
       noteApi.list({ pageSize: 3, sortBy: 'createdAt', sortOrder: 'desc' }),
       statsApi.overview(),
+      authApi.getMe(),
     ])
-      .then(([works, notes, s]) => {
+      .then(([works, notes, s, u]) => {
         setRecentWorks(works.items);
         setRecentNotes(notes.items);
         setStats(s);
+        setTasteSeals(u.tasteSeals || []);
+        setUser(u);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [setUser]);
 
   if (loading) return <Loading />;
 
@@ -145,6 +150,75 @@ export default function Home() {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+      )}
+
+      {tasteSeals.length > 0 && (
+        <section style={{ marginBottom: 'var(--spacing-2xl)' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 24 }}>
+            <h2 className="brush-underline">品味印记</h2>
+            <Link to="/statistics" style={{
+              fontFamily: 'var(--font-keishu)',
+              fontSize: 13, color: 'var(--ink-light)',
+              letterSpacing: '0.15em',
+            }}>
+              查看谱系 →
+            </Link>
+          </div>
+          <div style={{
+            display: 'flex', flexWrap: 'wrap', gap: 20,
+            padding: 32,
+            background: 'var(--xuan-light)',
+            border: '1px solid rgba(139,105,20,0.1)',
+            position: 'relative',
+          }} className="xuan-paper">
+            {tasteSeals.map((seal, i) => {
+              const rotations = [-4, -2, 0, 2, 4, -3, 3, -1, 1];
+              const rotate = rotations[i % rotations.length];
+              const categoryColors: Record<string, string> = {
+                director: '#C0392B',
+                actor: '#8E44AD',
+                author: '#16A085',
+                writer: '#2980B9',
+                genre: '#D35400',
+              };
+              const color = categoryColors[seal.category] || 'var(--zhusha)';
+              return (
+                <div
+                  key={`${seal.category}-${seal.name}`}
+                  style={{
+                    width: 88, height: 88,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: color,
+                    color: 'var(--xuan-white)',
+                    fontFamily: 'var(--font-keishu)',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.1em',
+                    transform: `rotate(${rotate}deg)`,
+                    boxShadow: `inset 0 0 0 4px ${color}, inset 0 0 0 5px rgba(245,239,224,0.25), 0 4px 12px rgba(0,0,0,0.15)`,
+                    borderRadius: 4,
+                    position: 'relative',
+                    opacity: 0.9,
+                    cursor: 'default',
+                    flexDirection: 'column',
+                    gap: 2,
+                  }}
+                  title={`${TASTE_CATEGORY_LABELS[seal.category]} · ${seal.name} · 留痕 ${seal.count} 部`}
+                >
+                  <div style={{ fontSize: 10, opacity: 0.7, letterSpacing: '0.2em' }}>
+                    {TASTE_CATEGORY_LABELS[seal.category]}
+                  </div>
+                  <div style={{ fontSize: seal.name.length > 3 ? 13 : 16, lineHeight: 1.1, textAlign: 'center' }}>
+                    {seal.name.length > 4 ? seal.name.slice(0, 4) : seal.name}
+                  </div>
+                  <div style={{
+                    position: 'absolute', inset: 0, pointerEvents: 'none',
+                    background: 'radial-gradient(ellipse at 30% 40%, rgba(245,239,224,0.2) 0%, transparent 60%)',
+                  }} />
+                </div>
+              );
+            })}
           </div>
         </section>
       )}

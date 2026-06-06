@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { statsApi } from '@/services';
-import type { StatsOverview, HeatmapData, MonthlyStat } from '@/types';
+import type { StatsOverview, HeatmapData, MonthlyStat, TasteGraph } from '@/types';
 import Loading from '@/components/common/Loading';
 import FoldingFan from '@/components/FoldingFan';
 import InkHeatmap from '@/components/InkHeatmap';
+import TasteGraphComponent from '@/components/TasteGraph';
 import { getMonthLabel } from '@/utils/date';
 import { useUserStore } from '@/stores/user';
 
@@ -12,6 +13,7 @@ export default function Statistics() {
   const [overview, setOverview] = useState<StatsOverview | null>(null);
   const [heatmap, setHeatmap] = useState<HeatmapData | null>(null);
   const [monthly, setMonthly] = useState<{ year: number; months: MonthlyStat[] } | null>(null);
+  const [tasteGraph, setTasteGraph] = useState<TasteGraph | null>(null);
   const [loading, setLoading] = useState(true);
   const { chineseColors } = useUserStore();
 
@@ -20,14 +22,16 @@ export default function Statistics() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [o, h, m] = await Promise.all([
+      const [o, h, m, t] = await Promise.all([
         statsApi.overview(),
         statsApi.heatmap(52),
         statsApi.monthly(currentYear),
+        statsApi.tasteGraph(),
       ]);
       setOverview(o);
       setHeatmap(h);
       setMonthly(m);
+      setTasteGraph(t);
     } finally {
       setLoading(false);
     }
@@ -214,6 +218,25 @@ export default function Statistics() {
               );
             })}
           </div>
+        </section>
+      )}
+
+      {tasteGraph && (
+        <section style={{
+          marginBottom: 56,
+          padding: 40,
+          background: 'var(--xuan-light)',
+          border: '1px solid rgba(139,105,20,0.12)',
+        }} className="xuan-paper">
+          <h2 className="brush-underline" style={{ marginBottom: 8 }}>品味谱系</h2>
+          <p style={{
+            fontFamily: 'var(--font-pizhu)', fontSize: 13,
+            color: 'var(--ink-light)', letterSpacing: '0.1em',
+            marginBottom: 32,
+          }}>
+            观己所好，见心所向 · 轻点查看作品，长按盖为印记
+          </p>
+          <TasteGraphComponent data={tasteGraph} onSealUpdate={loadData} />
         </section>
       )}
     </div>

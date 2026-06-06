@@ -274,6 +274,192 @@ class StatsService {
       milestones,
     };
   }
+
+  async getTasteGraph(userId) {
+    const works = await Work.find({ userId }).lean();
+
+    const directorCount = {};
+    const actorCount = {};
+    const authorCount = {};
+    const genreCount = {};
+    const writerCount = {};
+    const typeCount = { tv: 0, book: 0, movie: 0, other: 0 };
+    const workMap = {};
+    const collabLinks = [];
+
+    works.forEach((work) => {
+      workMap[work._id.toString()] = work;
+      typeCount[work.type] = (typeCount[work.type] || 0) + 1;
+
+      const workId = work._id.toString();
+
+      if (work.author) {
+        const names = work.author.split(/[,，、;；\/]/).map((s) => s.trim()).filter(Boolean);
+        names.forEach((n) => {
+          if (!authorCount[n]) authorCount[n] = { count: 0, works: [], avgRating: 0, totalRating: 0 };
+          authorCount[n].count++;
+          authorCount[n].works.push(workId);
+          if (work.rating > 0) {
+            authorCount[n].totalRating += work.rating;
+          }
+        });
+      }
+
+      (work.directors || []).forEach((n) => {
+        const name = n.trim();
+        if (!name) return;
+        if (!directorCount[name]) directorCount[name] = { count: 0, works: [], avgRating: 0, totalRating: 0 };
+        directorCount[name].count++;
+        directorCount[name].works.push(workId);
+        if (work.rating > 0) {
+          directorCount[name].totalRating += work.rating;
+        }
+      });
+
+      (work.actors || []).forEach((n) => {
+        const name = n.trim();
+        if (!name) return;
+        if (!actorCount[name]) actorCount[name] = { count: 0, works: [], avgRating: 0, totalRating: 0 };
+        actorCount[name].count++;
+        actorCount[name].works.push(workId);
+        if (work.rating > 0) {
+          actorCount[name].totalRating += work.rating;
+        }
+      });
+
+      (work.genres || []).forEach((g) => {
+        const name = g.trim();
+        if (!name) return;
+        if (!genreCount[name]) genreCount[name] = { count: 0, works: [], avgRating: 0, totalRating: 0 };
+        genreCount[name].count++;
+        genreCount[name].works.push(workId);
+        if (work.rating > 0) {
+          genreCount[name].totalRating += work.rating;
+        }
+      });
+
+      (work.writers || []).forEach((n) => {
+        const name = n.trim();
+        if (!name) return;
+        if (!writerCount[name]) writerCount[name] = { count: 0, works: [], avgRating: 0, totalRating: 0 };
+        writerCount[name].count++;
+        writerCount[name].works.push(workId);
+        if (work.rating > 0) {
+          writerCount[name].totalRating += work.rating;
+        }
+      });
+
+      const allPeople = [
+        ...(work.directors || []),
+        ...(work.actors || []),
+        ...(work.writers || []),
+        ...(work.author ? work.author.split(/[,，、;；\/]/) : []),
+      ].map((s) => s.trim()).filter(Boolean);
+
+      for (let i = 0; i < allPeople.length; i++) {
+        for (let j = i + 1; j < allPeople.length; j++) {
+          const a = allPeople[i];
+          const b = allPeople[j];
+          if (a === b) continue;
+          const key = [a, b].sort().join('↔');
+          const existing = collabLinks.find((l) => l.key === key);
+          if (existing) {
+            existing.count++;
+            existing.works.push(workId);
+          } else {
+            collabLinks.push({ key, source: a, target: b, count: 1, works: [workId] });
+          }
+        }
+      }
+    });
+
+    const calcAvg = (obj) => {
+      for (const k of Object.keys(obj)) {
+        const entry = obj[k];
+        entry.avgRating = entry.totalRating > 0 && entry.count > 0
+          ? Math.round((entry.totalRating / entry.count) * 10) / 10
+          : 0;
+        delete entry.totalRating;
+      }
+    };
+    calcAvg(directorCount);
+    calcAvg(actorCount);
+    calcAvg(authorCount);
+    calcAvg(genreCount);
+    calcAvg(writerCount);
+
+    const topDirectors = Object.entries(directorCount)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 20)
+      .map(([name, data]) => ({ name, ...data }));
+
+    const topActors = Object.entries(actorCount)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 30)
+      .map(([name, data]) => ({ name, ...data }));
+
+    const topAuthors = Object.entries(authorCount)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 20)
+      .map(([name, data]) => ({ name, ...data }));
+
+    const topGenres = Object.entries(genreCount)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 20)
+      .map(([name, data]) => ({ name, ...data }));
+
+    const topWriters = Object.entries(writerCount)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 20)
+      .map(([name, data]) => ({ name, ...data }));
+
+    const topCollabs = collabLinks
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 50)
+      .map(({ key, source, target, count, works }) => ({ source, target, count, works }));
+
+    const nodes = [];
+    const seenNodes = new Set();
+
+    const addNode = (name, category, data) => {
+      if (seenNodes.has(name)) return;
+      seenNodes.add(name);
+      nodes.push({
+        id: name,
+        name,
+        category,
+        count: data.count,
+        avgRating: data.avgRating,
+        works: data.works,
+      });
+    };
+
+    topDirectors.forEach((d) => addNode(d.name, 'director', d));
+    topActors.forEach((a) => addNode(a.name, 'actor', a));
+    topAuthors.forEach((a) => addNode(a.name, 'author', a));
+    topWriters.forEach((w) => addNode(w.name, 'writer', w));
+    topGenres.forEach((g) => addNode(g.name, 'genre', g));
+
+    const links = topCollabs
+      .filter((l) => seenNodes.has(l.source) && seenNodes.has(l.target))
+      .map(({ source, target, count, works }) => ({ source, target, value: count, works }));
+
+    return {
+      totalWorks: works.length,
+      typeCount,
+      topDirectors,
+      topActors,
+      topAuthors,
+      topGenres,
+      topWriters,
+      network: {
+        nodes,
+        links,
+      },
+      works: workMap,
+      generatedAt: new Date(),
+    };
+  }
 }
 
 module.exports = new StatsService();

@@ -52,6 +52,41 @@ class AuthService {
     await user.save();
     return user.toJSON();
   }
+
+  async addTasteSeal(userId, seal) {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new AppError('用户不存在', 404, 'NOT_FOUND');
+    }
+    if (!user.tasteSeals) user.tasteSeals = [];
+    const existing = user.tasteSeals.find((s) => s.name === seal.name && s.category === seal.category);
+    if (existing) {
+      throw new AppError('该品味印记已存在', 400, 'VALIDATION_ERROR');
+    }
+    if (user.tasteSeals.length >= 12) {
+      throw new AppError('品味印记最多 12 枚', 400, 'VALIDATION_ERROR');
+    }
+    user.tasteSeals.push({
+      name: seal.name,
+      category: seal.category,
+      count: seal.count || 0,
+      avgRating: seal.avgRating || 0,
+    });
+    await user.save();
+    return user.toJSON();
+  }
+
+  async removeTasteSeal(userId, sealName, category) {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new AppError('用户不存在', 404, 'NOT_FOUND');
+    }
+    user.tasteSeals = (user.tasteSeals || []).filter(
+      (s) => !(s.name === sealName && s.category === category)
+    );
+    await user.save();
+    return user.toJSON();
+  }
 }
 
 module.exports = new AuthService();

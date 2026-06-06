@@ -24,4 +24,9 @@ const getAnnualReport = asyncHandler(async (req, res) => {
   res.json(report);
 });
 
-module.exports = { getOverview, getWeeklyHeatmap, getMonthlyStats, getAnnualReport };
+const getTasteGraph = asyncHandler(async (req, res) => {
+  const graph = await statsService.getTasteGraph(req.user._id);
+  res.json(graph);
+});
+
+module.exports = { getOverview, getWeeklyHeatmap, getMonthlyStats, getAnnualReport, getTasteGraph };

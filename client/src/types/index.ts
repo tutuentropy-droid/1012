@@ -8,16 +8,6 @@ export interface BindingPreferences {
   sealStyle: SealStyle;
 }
 
-export interface User {
-  _id: string;
-  username: string;
-  email: string;
-  bio?: string;
-  avatar?: string;
-  preferences?: Record<string, any>;
-  createdAt: string;
-}
-
 export const PAPER_TEXTURES: { value: PaperTexture; label: string; desc: string }[] = [
   { value: 'xuanzhi', label: '宣纸', desc: '洁白细密，纤维匀净，千年寿纸' },
   { value: 'maobian', label: '毛边纸', desc: '微黄粗糙，竹纤维显，古意盎然' },
@@ -66,6 +56,10 @@ export interface Work {
   title: string;
   subtitle?: string;
   author?: string;
+  directors?: string[];
+  actors?: string[];
+  genres?: string[];
+  writers?: string[];
   cover?: string;
   description?: string;
   totalEpisodes?: number;
@@ -224,4 +218,119 @@ export const RATING_LABELS: Record<Rating | 0, string> = {
   3: '中',
   4: '上',
   5: '上上品',
+};
+
+export type TasteCategory = 'director' | 'actor' | 'author' | 'writer' | 'genre';
+
+export interface TasteSeal {
+  name: string;
+  category: TasteCategory;
+  count: number;
+  avgRating: number;
+  createdAt: string;
+}
+
+export interface User {
+  _id: string;
+  username: string;
+  email: string;
+  bio?: string;
+  avatar?: string;
+  preferences?: Record<string, any>;
+  tasteSeals?: TasteSeal[];
+  createdAt: string;
+}
+
+export interface TasteNode {
+  id: string;
+  name: string;
+  category: TasteCategory;
+  count: number;
+  avgRating: number;
+  works: string[];
+}
+
+export interface TasteLink {
+  source: string;
+  target: string;
+  value: number;
+  works: string[];
+}
+
+export interface TasteNetwork {
+  nodes: TasteNode[];
+  links: TasteLink[];
+}
+
+export interface TasteTopItem {
+  name: string;
+  count: number;
+  avgRating: number;
+  works: string[];
+}
+
+export interface TasteGraph {
+  totalWorks: number;
+  typeCount: Record<WorkType, number>;
+  topDirectors: TasteTopItem[];
+  topActors: TasteTopItem[];
+  topAuthors: TasteTopItem[];
+  topGenres: TasteTopItem[];
+  topWriters: TasteTopItem[];
+  network: TasteNetwork;
+  works: Record<string, Work>;
+  generatedAt: string;
+}
+
+export interface ImportPreviewMatched {
+  index: number;
+  record: Partial<Work> & { tags?: string[]; note?: string };
+  existingId: string;
+  existingTitle: string;
+  merged: Partial<Work>;
+  tags: string[];
+  note?: string;
+}
+
+export interface ImportPreviewUnmatched {
+  index: number;
+  record: Partial<Work> & { tags?: string[]; note?: string };
+  suggestedType: WorkType;
+  tags: string[];
+  note?: string;
+}
+
+export interface ImportPreviewResult {
+  total: number;
+  matched: number;
+  unmatched: number;
+  errorCount: number;
+  matchedItems: ImportPreviewMatched[];
+  unmatchedItems: ImportPreviewUnmatched[];
+  errors: Array<{ index: number; record: any; reason: string }>;
+}
+
+export interface ImportConfirmItem {
+  record: Partial<Work>;
+  type?: WorkType;
+  status?: WorkStatus;
+  rating?: Rating;
+  tags?: string[];
+  note?: string;
+}
+
+export interface ImportConfirmResult {
+  created: number;
+  updated: number;
+  skipped: number;
+  createdIds: string[];
+  updatedIds: string[];
+}
+
+export const TASTE_CATEGORY_LABELS: Record<TasteCategory, string> = {
+  director: '导演',
+  actor: '演员',
+  author: '作者',
+  writer: '编剧',
+  genre: '类型',
 };

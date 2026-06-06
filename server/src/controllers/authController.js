@@ -27,4 +27,19 @@ const updatePreferences = asyncHandler(async (req, res) => {
   res.json(user);
 });
 
-module.exports = { register, login, getMe, updatePreferences };
+const addTasteSeal = asyncHandler(async (req, res) => {
+  const { name, category, count, avgRating } = req.body;
+  if (!name || !category) {
+    throw new AppError('名称和类别必填', 400, 'VALIDATION_ERROR');
+  }
+  const user = await authService.addTasteSeal(req.user._id, { name, category, count, avgRating });
+  res.json(user);
+});
+
+const removeTasteSeal = asyncHandler(async (req, res) => {
+  const { name, category } = req.params;
+  const user = await authService.removeTasteSeal(req.user._id, decodeURIComponent(name), category);
+  res.json(user);
+});
+
+module.exports = { register, login, getMe, updatePreferences, addTasteSeal, removeTasteSeal };

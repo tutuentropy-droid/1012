@@ -32,6 +32,22 @@ const workSchema = new mongoose.Schema(
       maxlength: 100,
       default: '',
     },
+    directors: {
+      type: [String],
+      default: [],
+    },
+    actors: {
+      type: [String],
+      default: [],
+    },
+    genres: {
+      type: [String],
+      default: [],
+    },
+    writers: {
+      type: [String],
+      default: [],
+    },
     cover: {
       type: String,
       default: '',

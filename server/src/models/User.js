@@ -43,6 +43,19 @@ const userSchema = new mongoose.Schema(
       of: mongoose.Schema.Types.Mixed,
       default: {},
     },
+    tasteSeals: [
+      {
+        name: { type: String, required: true },
+        category: {
+          type: String,
+          enum: ['director', 'actor', 'author', 'writer', 'genre'],
+          required: true,
+        },
+        count: { type: Number, default: 0 },
+        avgRating: { type: Number, default: 0 },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   {
     timestamps: true,
