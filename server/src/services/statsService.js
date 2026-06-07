@@ -19,8 +19,8 @@ class StatsService {
       Note.find({ userId }),
     ]);
 
-    const byType = { tv: 0, book: 0, movie: 0, other: 0 };
-    const byStatus = { wish: 0, watching: 0, watched: 0, paused: 0, dropped: 0 };
+    const byType = { tv: 0, book: 0, movie: 0 };
+    const byStatus = { wish: 0, watching: 0, watched: 0 };
     let watchedThisYear = 0;
     let watchingNow = 0;
     let totalEpisodes = 0;
@@ -283,7 +283,7 @@ class StatsService {
     const authorCount = {};
     const genreCount = {};
     const writerCount = {};
-    const typeCount = { tv: 0, book: 0, movie: 0, other: 0 };
+    const typeCount = { tv: 0, book: 0, movie: 0 };
     const workMap = {};
     const collabLinks = [];
 

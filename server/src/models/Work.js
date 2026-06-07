@@ -10,7 +10,7 @@ const workSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['tv', 'book', 'movie', 'other'],
+      enum: ['tv', 'book', 'movie'],
       required: true,
       index: true,
     },
@@ -74,7 +74,7 @@ const workSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['wish', 'watching', 'watched', 'paused', 'dropped'],
+      enum: ['wish', 'watching', 'watched'],
       default: 'wish',
       index: true,
     },
@@ -138,7 +138,10 @@ workSchema.virtual('progressPercent').get(function () {
   if (this.type === 'tv' && this.totalEpisodes > 0) {
     return Math.min(100, Math.round((this.currentEpisode / this.totalEpisodes) * 100));
   }
-  if ((this.type === 'book' || this.type === 'other') && this.totalPages > 0) {
+  if (this.type === 'book' && this.totalPages > 0) {
+    return Math.min(100, Math.round((this.currentPage / this.totalPages) * 100));
+  }
+  if (this.type === 'movie' && this.totalPages > 0) {
     return Math.min(100, Math.round((this.currentPage / this.totalPages) * 100));
   }
   return 0;

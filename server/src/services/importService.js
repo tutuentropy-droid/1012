@@ -30,15 +30,15 @@ const TYPE_MAP = {
   '剧集': 'tv', '电视剧': 'tv', 'tv': 'tv', 'tv series': 'tv', 'series': 'tv',
   '书籍': 'book', '图书': 'book', '书': 'book', 'book': 'book', 'ebook': 'book',
   '电影': 'movie', 'movie': 'movie', 'film': 'movie',
-  '其他': 'other', 'other': 'other',
+  '其他': 'book', 'other': 'book',
 };
 
 const STATUS_MAP = {
   '想看': 'wish', '想读': 'wish', '想看': 'wish', 'wish': 'wish', 'to-watch': 'wish', 'to-read': 'wish',
   '在看': 'watching', '在读': 'watching', 'watching': 'watching', 'reading': 'watching',
   '已看': 'watched', '已读': 'watched', '看过': 'watched', 'watched': 'watched', 'read': 'watched',
-  '搁置': 'paused', '暂停': 'paused', 'paused': 'paused', 'on-hold': 'paused',
-  '弃坑': 'dropped', '弃': 'dropped', 'dropped': 'dropped', 'abandoned': 'dropped',
+  '搁置': 'wish', '暂停': 'wish', 'paused': 'wish', 'on-hold': 'wish',
+  '弃坑': 'wish', '弃': 'wish', 'dropped': 'wish', 'abandoned': 'wish',
 };
 
 class ImportService {
@@ -59,7 +59,7 @@ class ImportService {
 
     switch (field) {
       case 'type':
-        return TYPE_MAP[str.toLowerCase()] || TYPE_MAP[str] || 'other';
+        return TYPE_MAP[str.toLowerCase()] || TYPE_MAP[str] || 'book';
       case 'status':
         return STATUS_MAP[str.toLowerCase()] || STATUS_MAP[str] || 'wish';
       case 'rating': {
@@ -217,7 +217,7 @@ class ImportService {
     if (!merged.status || merged.status === 'wish' && record.status !== 'wish') {
       merged.status = record.status || merged.status;
     }
-    if (!merged.type || merged.type === 'other') {
+    if (!merged.type) {
       merged.type = record.type || merged.type;
     }
 
@@ -226,21 +226,20 @@ class ImportService {
 
   async ensureTags(userId, tagNames) {
     if (!tagNames || tagNames.length === 0) return [];
+    const { FIXED_TAGS } = require('../data/constants');
+    const FIXED_TAG_NAMES = FIXED_TAGS.map((t) => t.name);
     const tagIds = [];
 
     for (const name of tagNames) {
+      if (!FIXED_TAG_NAMES.includes(name)) continue;
       let tag = await Tag.findOne({ userId, name });
       if (!tag) {
-        tag = await Tag.create({ userId, name, color: this.randomTagColor() });
+        const fixedTag = FIXED_TAGS.find((t) => t.name === name);
+        tag = await Tag.create({ userId, name, color: fixedTag.color, workCount: 0 });
       }
       tagIds.push(tag._id);
     }
     return tagIds;
-  }
-
-  randomTagColor() {
-    const colors = ['#E74C3C', '#3498DB', '#27AE60', '#F39C12', '#9B59B6', '#1ABC9C', '#E67E22', '#34495E'];
-    return colors[Math.floor(Math.random() * colors.length)];
   }
 
   async processImport(userId, records) {
@@ -296,9 +295,9 @@ class ImportService {
   suggestType(record) {
     if (record.type && record.type !== 'other') return record.type;
     if (record.directors || record.actors) return 'movie';
-    if (record.totalPages || record.totalPages === 0 && record.currentPage) return 'book';
-    if (record.totalEpisodes || record.totalEpisodes === 0 && record.currentEpisode) return 'tv';
-    return 'other';
+    if (record.totalPages !== undefined || record.currentPage) return 'book';
+    if (record.totalEpisodes !== undefined || record.currentEpisode) return 'tv';
+    return 'book';
   }
 
   async confirmImport(userId, action, matchedIds, unmatchedItems) {
@@ -348,7 +347,7 @@ class ImportService {
       try {
         const workData = {
           userId,
-          type: item.type || item.suggestedType || 'other',
+          type: item.type || item.suggestedType || 'book',
           title: item.record.title,
           subtitle: item.record.subtitle || '',
           author: item.record.author || '',

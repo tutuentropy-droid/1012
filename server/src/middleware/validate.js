@@ -23,7 +23,7 @@ const schemas = {
   }),
 
   work: Joi.object({
-    type: Joi.string().valid('tv', 'book', 'movie', 'other').required(),
+    type: Joi.string().valid('tv', 'book', 'movie').required(),
     title: Joi.string().min(1).max(200).required(),
     subtitle: Joi.string().max(200).allow('').optional(),
     author: Joi.string().max(100).allow('').optional(),
@@ -34,7 +34,7 @@ const schemas = {
     currentEpisode: Joi.number().integer().min(0).default(0),
     currentPage: Joi.number().integer().min(0).default(0),
     status: Joi.string()
-      .valid('wish', 'watching', 'watched', 'paused', 'dropped')
+      .valid('wish', 'watching', 'watched')
       .default('wish'),
     rating: Joi.number().integer().min(0).max(5).default(0),
     moodColor: Joi.string().allow('').optional(),
@@ -45,7 +45,7 @@ const schemas = {
     currentEpisode: Joi.number().integer().min(0).optional(),
     currentPage: Joi.number().integer().min(0).optional(),
     status: Joi.string()
-      .valid('wish', 'watching', 'watched', 'paused', 'dropped')
+      .valid('wish', 'watching', 'watched')
       .optional(),
     moodColor: Joi.string().allow('').optional(),
   }),
