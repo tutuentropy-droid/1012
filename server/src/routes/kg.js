@@ -1,10 +1,10 @@
 const express = require('express');
 const kgController = require('../controllers/kgController');
-const authMiddleware = require('../middleware/auth');
+const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-router.use(authMiddleware.authenticate);
+router.use(auth);
 
 router.get('/', kgController.getGraph);
 router.post('/refresh', kgController.refreshGraph);
