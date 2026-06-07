@@ -95,3 +95,33 @@ export const searchApi = {
     api.get<{ works: Work[]; notes: Note[]; tags: Tag[] }>('/search', { params: { q, scope } }).then((r) => r.data),
   colors: () => api.get<ChineseColor[]>('/search/colors').then((r) => r.data),
 };
+
+import type {
+  KnowledgeGraph,
+  KGNodeDetail,
+  KGNodeAnnotation,
+  KGEdge,
+} from '@/types';
+
+export const kgApi = {
+  getGraph: (refresh = false) =>
+    api.get<KnowledgeGraph>('/kg', { params: { refresh } }).then((r) => r.data),
+  refreshGraph: () =>
+    api.post<KnowledgeGraph>('/kg/refresh').then((r) => r.data),
+  getNodeDetail: (nodeId: string) =>
+    api.get<KGNodeDetail>(`/kg/nodes/${nodeId}`).then((r) => r.data),
+  updateNode: (nodeId: string, data: Partial<{ isHidden: boolean; synonyms: string[]; name: string; category: string }>) =>
+    api.put<KnowledgeGraph>(`/kg/nodes/${nodeId}`, data).then((r) => r.data),
+  toggleHidden: (nodeId: string) =>
+    api.patch<{ isHidden: boolean }>(`/kg/nodes/${nodeId}/hidden`).then((r) => r.data),
+  addAnnotation: (nodeId: string, content: string) =>
+    api.post<KGNodeAnnotation>(`/kg/nodes/${nodeId}/annotations`, { content }).then((r) => r.data),
+  removeAnnotation: (nodeId: string, annotationId: string) =>
+    api.delete(`/kg/nodes/${nodeId}/annotations/${annotationId}`).then((r) => r.data),
+  addManualEdge: (source: string, target: string) =>
+    api.post<KGEdge>('/kg/edges', { source, target }).then((r) => r.data),
+  removeEdge: (edgeId: string) =>
+    api.delete(`/kg/edges/${edgeId}`).then((r) => r.data),
+  exportData: (format: 'json' | 'csv') =>
+    api.get(`/kg/export`, { params: { format }, responseType: 'blob' }).then((r) => r.data),
+};

@@ -7,6 +7,7 @@ import type { InkLevel } from '@/types';
 const navItems = [
   { path: '/', label: '首页', icon: '卷' },
   { path: '/works', label: '书卷', icon: '册' },
+  { path: '/knowledge-graph', label: '知识谱', icon: '络' },
   { path: '/dual-order', label: '双序阁', icon: '谱' },
   { path: '/notes', label: '笔记', icon: '批' },
   { path: '/statistics', label: '统计', icon: '图' },

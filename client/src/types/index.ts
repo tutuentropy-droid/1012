@@ -334,3 +334,111 @@ export const TASTE_CATEGORY_LABELS: Record<TasteCategory, string> = {
   writer: '编剧',
   genre: '类型',
 };
+
+export type KGNodeCategory = 'person' | 'place' | 'era' | 'imagery' | 'theme' | 'work';
+
+export const KG_CATEGORY_LABELS: Record<KGNodeCategory, string> = {
+  person: '人名',
+  place: '地名',
+  era: '时代',
+  imagery: '意象',
+  theme: '主题',
+  work: '作品',
+};
+
+export const KG_CATEGORY_COLORS: Record<KGNodeCategory, string> = {
+  person: '#8B4513',
+  place: '#2980B9',
+  era: '#8E44AD',
+  imagery: '#16A085',
+  theme: '#D35400',
+  work: '#C0392B',
+};
+
+export interface KGNodeAnnotation {
+  id: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface KGNode {
+  id: string;
+  name: string;
+  category: KGNodeCategory;
+  frequency: number;
+  synonyms: string[];
+  isHidden: boolean;
+  annotations: KGNodeAnnotation[];
+  firstSeenAt: string;
+  lastSeenAt: string;
+  noteIds: string[];
+  workIds: string[];
+  x?: number;
+  y?: number;
+  cluster?: string;
+}
+
+export type KGEdgeType = 'cooccurrence' | 'manual';
+
+export interface KGEdge {
+  id: string;
+  source: string;
+  target: string;
+  weight: number;
+  type: KGEdgeType;
+  noteIds: string[];
+  createdAt: string;
+}
+
+export interface KGCluster {
+  id: string;
+  label: string;
+  nodeIds: string[];
+  color: string;
+}
+
+export interface KGTimelineSnapshot {
+  id?: string;
+  date: string;
+  quarter: string;
+  newNodes: string[];
+  newEdges: string[];
+  summary: string;
+  topTerms: string[];
+}
+
+export interface KnowledgeGraph {
+  nodes: KGNode[];
+  edges: KGEdge[];
+  clusters: KGCluster[];
+  timeline: KGTimelineSnapshot[];
+  generatedAt: string;
+  totalNotes: number;
+  totalWorks: number;
+}
+
+export interface KGRelatedItem {
+  type: 'work' | 'note';
+  id: string;
+  title?: string;
+  content?: string;
+  workType?: WorkType;
+  moodColor?: string;
+  rating?: Rating;
+  createdAt: string;
+  workTitle?: string;
+}
+
+export interface KGNodeDetail {
+  node: KGNode;
+  relatedItems: KGRelatedItem[];
+  connectedNodes: KGNode[];
+}
+
+export interface KGExportFormat {
+  nodes: Array<Pick<KGNode, 'id' | 'name' | 'category' | 'frequency' | 'synonyms' | 'firstSeenAt' | 'lastSeenAt'>>;
+  edges: Array<Pick<KGEdge, 'id' | 'source' | 'target' | 'weight' | 'type'>>;
+  generatedAt: string;
+  totalNotes: number;
+  totalWorks: number;
+}

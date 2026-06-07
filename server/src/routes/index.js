@@ -6,6 +6,7 @@ const tagRoutes = require('./tag');
 const statsRoutes = require('./stats');
 const searchRoutes = require('./search');
 const importRoutes = require('./import');
+const kgRoutes = require('./kg');
 
 const router = express.Router();
 
@@ -16,5 +17,6 @@ router.use('/tags', tagRoutes);
 router.use('/stats', statsRoutes);
 router.use('/search', searchRoutes);
 router.use('/import', importRoutes);
+router.use('/kg', kgRoutes);
 
 module.exports = router;
